@@ -1,3 +1,5 @@
+import playList from './playList.js';
+console.log(playList)
 const time = document.querySelector('.time');
 const date = document.querySelector('.date');
 const greeting = document.querySelector('.greeting');
@@ -14,6 +16,17 @@ const humidity = document.querySelector('.humidity');
 const quote = document.querySelector('.quote');
 const author = document.querySelector('.author');
 const changeQuote = document.querySelector('.change-quote');
+const player = document.querySelector('.player');
+const audio = document.querySelector('.audio');
+const prevBtn = document.querySelector('.play-prev');
+const nextBtn = document.querySelector('.play-next');
+const play = document.querySelector('.play');
+const playListCont= document.querySelector('.play-list');
+
+let isPlay = false;
+let playNum = 0;
+
+
 
 
 
@@ -84,7 +97,7 @@ function getRandomNum(min, max) {
 }
 
 function setBg() {
-    timeOfDay = getTimeOfDay();
+    let timeOfDay = getTimeOfDay();
     let bgNum = randomNum.toString().padStart(2, "0");
     const img = new Image();
     img.src = `https://raw.githubusercontent.com/ErkhanDV/stage1-tasks/assets/images/${timeOfDay}/${bgNum}.jpg`;
@@ -127,13 +140,57 @@ async function getQuotes() {
     const quotes = '../js/phases.json';
     const res = await fetch(quotes);
     const data = await res.json();
-    let pharaseNum = getRandomNum(0, Object.keys(data).length)
+    let pharaseNum = getRandomNum(0, Object.keys(data).length - 1)
     author.innerHTML = data[pharaseNum].author;
     quote.innerHTML = `\"${data[pharaseNum].text}\"`;
 }
 getQuotes();
 
 changeQuote.addEventListener('click', getQuotes);
+
+function playAudio() {
+    audio.currentTime = 0;
+    audio.src = playList[playNum].src;
+    if (!isPlay) {
+        audio.play();
+        isPlay = true;
+        
+    } else {
+        audio.pause();
+        isPlay = false;
+    }
+}
+play.addEventListener('click', playAudio);
+
+function toggleBtn() {
+    play.classList.toggle('pause');
+}
+play.addEventListener('click', toggleBtn);
+
+
+function playNext() {
+    playNum = playNum == playList.length - 1 ? 0 : ++playNum;
+    isPlay = false;
+    playAudio();
+}
+nextBtn.addEventListener('click', playNext)
+
+function playPrev() {
+    playNum = playNum == 0 ? playList.length - 1 : --playNum;
+    isPlay = false;
+    playAudio();
+}
+prevBtn.addEventListener('click', playPrev)
+
+audio.addEventListener("ended", playNext);
+
+playList.forEach(item => {
+    const li = document.createElement('li');
+    
+    li.classList.add('play-item');
+    li.textContent = item.title;
+    playListCont.append(li);
+});
 
 
 
