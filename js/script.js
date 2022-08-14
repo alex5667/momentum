@@ -1,5 +1,4 @@
 import playList from './playList.js';
-console.log(playList)
 const time = document.querySelector('.time');
 const date = document.querySelector('.date');
 const greeting = document.querySelector('.greeting');
@@ -16,15 +15,24 @@ const humidity = document.querySelector('.humidity');
 const quote = document.querySelector('.quote');
 const author = document.querySelector('.author');
 const changeQuote = document.querySelector('.change-quote');
-const player = document.querySelector('.player');
-const audio = document.querySelector('.audio');
+
+const song = document.querySelector('.song');
+const progress = document.querySelector('.progress');
+const progressCont = document.querySelector('.progress__cont');
+
+const audioPlayer = document.querySelector('.player');
+// const audio = document.querySelector('.audio');
 const prevBtn = document.querySelector('.play-prev');
 const nextBtn = document.querySelector('.play-next');
 const play = document.querySelector('.play');
-const playListCont= document.querySelector('.play-list');
+const playListCont = document.querySelector('.play-list');
+const current = document.querySelector('.current');
+let currentT = 0;
+
 
 let isPlay = false;
 let playNum = 0;
+const audio = new Audio(playList[playNum].src);
 
 
 
@@ -129,7 +137,7 @@ async function getWeather() {
     weatherIcon.classList.add(`owf-${data.weather[0].id}`);
     temperature.textContent = `${Math.round(data.main.temp)}°C`;
     weatherDescription.textContent = data.weather[0].main;
-    wind.textContent = `Wind speed: ${data.wind.speed} m/s`;
+    wind.textContent = `Wind speed: ${Math.round(data.wind.speed)} m/s`;
     humidity.textContent = `Humidity: ${data.main.humidity}%`;
 
 }
@@ -149,15 +157,17 @@ getQuotes();
 changeQuote.addEventListener('click', getQuotes);
 
 function playAudio() {
-    audio.currentTime = 0;
+    // audio.currentTime = 0;
     audio.src = playList[playNum].src;
     if (!isPlay) {
         audio.play();
         isPlay = true;
-        
+        playNow();
+
     } else {
         audio.pause();
         isPlay = false;
+        playNow();
     }
 }
 play.addEventListener('click', playAudio);
@@ -170,14 +180,14 @@ play.addEventListener('click', toggleBtn);
 
 function playNext() {
     playNum = playNum == playList.length - 1 ? 0 : ++playNum;
-    isPlay = false;
+    isPlay = isPlay == true ? false : true;
     playAudio();
 }
 nextBtn.addEventListener('click', playNext)
 
 function playPrev() {
     playNum = playNum == 0 ? playList.length - 1 : --playNum;
-    isPlay = false;
+    isPlay = isPlay == true ? false : true;
     playAudio();
 }
 prevBtn.addEventListener('click', playPrev)
@@ -186,11 +196,106 @@ audio.addEventListener("ended", playNext);
 
 playList.forEach(item => {
     const li = document.createElement('li');
-    
     li.classList.add('play-item');
     li.textContent = item.title;
     playListCont.append(li);
 });
+
+function playNow() {
+    const playLis = document.querySelectorAll('.play-item');
+    playLis.forEach((el) => el.classList.remove('item-active'));
+    playLis[playNum].classList.add('item-active');
+    setsongTitle();
+
+}
+
+function setsongTitle() {
+    song.innerHTML = playList[playNum].title;
+}
+
+
+audio.addEventListener(
+    'loadeddata',
+    () => {
+        audioPlayer.querySelector(".playtime .length").textContent = getTimeCodeFromNum(
+            audio.duration
+        );
+        audio.volume = .75;
+        setsongTitle();
+    },
+    false
+);
+
+
+// Progress bar
+function updateProgress(ev) {
+    const { duration, currentTime } = ev.srcElement;
+    const progressPercent = (currentTime / duration) * 100;
+    progress.style.width = `${progressPercent}%`;
+    current.innerHTML = getTimeCodeFromNum(audio.currentTime
+    );
+  
+}
+audio.addEventListener('timeupdate', updateProgress)
+
+// setInterval(() => {
+//     const progressBar = audioPlayer.querySelector(".progress");
+//     progressBar.style.width = audio.currentTime / audio.duration * 100 + "%";
+//     currentT = getTimeCodeFromNum(
+//       audio.currentTime
+//     );
+//     console.log(currentT)
+//   }, 500);
+
+
+
+// set progress
+
+function setProgress(ev) {
+    const width = this.clientWidth;
+    const clickX = ev.offsetX;
+    const duration = audio.duration;
+    audio.currentTime = (clickX / width) * duration;
+}
+progressCont.addEventListener('click', setProgress)
+
+function getTimeCodeFromNum(num) {
+    let seconds = parseInt(num);
+    let minutes = parseInt(seconds / 60);
+    seconds -= minutes * 60;
+    const hours = parseInt(minutes / 60);
+    minutes -= hours * 60;
+
+    if (hours === 0) return `${minutes}:${String(seconds % 60).padStart(2, 0)}`;
+    return `${String(hours).padStart(2, 0)}:${minutes}:${String(
+        seconds % 60
+    ).padStart(2, 0)}`;
+}
+
+//click volume slider to change volume
+const volumeSlider = audioPlayer.querySelector(".volume-slider");
+volumeSlider.addEventListener('click', e => {
+  const sliderWidth = window.getComputedStyle(volumeSlider).width;
+  const newVolume = e.offsetX / parseInt(sliderWidth);
+  audio.volume = newVolume;
+  audioPlayer.querySelector(".volume-percentage").style.width = newVolume * 100 + '%';
+}, false)
+
+
+audioPlayer.querySelector(".volume__button").addEventListener("click", () => {
+    const volumeEl = audioPlayer.querySelector(".volume-container .volume");
+    audio.muted = !audio.muted;
+    if (audio.muted) {
+      volumeEl.classList.remove("icono-volumeMedium");
+      volumeEl.classList.add("icono-volumeMute");
+    } else {
+      volumeEl.classList.add("icono-volumeMedium");
+      volumeEl.classList.remove("icono-volumeMute");
+    }
+  });
+
+
+
 
 
 

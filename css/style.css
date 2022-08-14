@@ -31,13 +31,89 @@ body {
   padding: 20px;
 }
 
+.player {
+  text-align: center;
+}
+.song{
+  text-align: center;
+  padding-bottom: 10px;
+  font-weight: bold;
+  font-style: normal;
+  font-size: 18px;
+}
+.progress__cont{
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: #fff;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+
+}
+.progress {
+  background: coral;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+
 .player-controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 120px;
-  margin-bottom: 28px;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 12px;
 }
+
+
+
+.playtime{
+  display: flex;
+  font-size: 12px;
+}
+.volume-container {
+  cursor: pointer;
+  position: relative;
+ }
+
+.volume__button {
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+.volume {
+  transform: scale(0.7);
+}
+
+.volume-slider {
+  position: absolute;
+  left: 25px;
+  top: 5px;
+  width: 0;
+  height: 10px;
+  background: white;
+  box-shadow: 0 0 10px #000a;
+  border-radius: 5px;
+  transition: .25s;
+  overflow: hidden;
+}
+.volume-percentage {
+  background: coral;
+  height: 100%;
+  width: 80%;
+}
+.volume-container:hover .volume-slider {
+  left: 40px;
+  width: 80px;
+}
+
+
 
 .play-list {
   text-align: left;
